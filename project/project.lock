@@ -1,0 +1,93 @@
+extract:
+  cmd: python -m spacy run extract
+  script:
+    - gunzip --keep assets/train.conllu.gz assets/dev.conllu.gz
+  deps:
+    - path: assets/train.conllu.gz
+      md5: 9d2044ee59d09ce9be6f5719e533d481
+    - path: assets/dev.conllu.gz
+      md5: f41459ee9b781187f1456e390bf526fa
+  outs:
+    - path: assets/train.conllu
+      md5: 412fbcf072aab655b3496d74fd58e20d
+    - path: assets/dev.conllu
+      md5: db0d18de45294fd4f2583dcdfc2ca373
+  spacy_version: 3.1.3
+  spacy_git_version: 8bda39f08
+corpus:
+  cmd: python -m spacy run corpus
+  script:
+    - spacy convert assets/train.conllu corpus --converter conllu --n-sents 10 --morphology
+    - spacy convert assets/dev.conllu corpus --converter conllu --n-sents 10 --morphology
+  deps:
+    - path: assets/train.conllu
+      md5: 412fbcf072aab655b3496d74fd58e20d
+    - path: assets/dev.conllu
+      md5: db0d18de45294fd4f2583dcdfc2ca373
+  outs:
+    - path: corpus/train.spacy
+      md5: 52c6854217aa0cf41af59f5acc43e915
+    - path: corpus/dev.spacy
+      md5: 7672fef6be54f1af901a0f8eb56be83f
+  spacy_version: 3.1.3
+  spacy_git_version: 8bda39f08
+vectors:
+  cmd: python -m spacy run vectors
+  script:
+    - spacy init vectors ru assets/vectors.txt.gz corpus/vectors --prune 125000 --name
+      ru_navec_vectors_md
+  deps:
+    - path: assets/vectors.txt.gz
+      md5: 45eb1858c8316a01be68a6d09f1c16cb
+  outs:
+    - path: corpus/vectors
+      md5: 7b940046ca7f46dd8b46e62c1c709719
+  spacy_version: 3.1.3
+  spacy_git_version: 8bda39f08
+train:
+  cmd: python -m spacy run train
+  script:
+    - python -m spacy train config.cfg --output training
+  deps:
+    - path: config.cfg
+      md5: 6d81772516af44438d0bc3426cc15df7
+    - path: corpus/vectors
+      md5: 7b940046ca7f46dd8b46e62c1c709719
+    - path: corpus/train.spacy
+      md5: 52c6854217aa0cf41af59f5acc43e915
+    - path: corpus/dev.spacy
+      md5: 7672fef6be54f1af901a0f8eb56be83f
+  outs:
+    - path: training/model-best
+      md5: 79433a761599abf4125c3dec00ed4fa0
+  spacy_version: 3.1.3
+  spacy_git_version: 8bda39f08
+package_trf:
+  cmd: python -m spacy run package_trf
+  script:
+    - python -m spacy package training/model-best package --name core_news_trf --version
+      3.0.0 --force
+  deps:
+    - path: training/model-best
+      md5: 47f2afc0382c7ea63f5e60e498c9eca9
+  outs:
+    - path: package/ru_core_news_trf-3.0.0/dist/ru_core_news_trf-3.0.0.tar.gz
+      md5: 659c2f52cf0f2f6200c17d4d4acb8158
+  spacy_version: 3.1.3
+  spacy_git_version: 8bda39f08
+train_trf:
+  cmd: python -m spacy run train_trf
+  script:
+    - python -m spacy train config_trf.cfg --output training
+  deps:
+    - path: config_trf.cfg
+      md5: 5a8e9ad2079eff88cc86514053157384
+    - path: corpus/train.spacy
+      md5: 52c6854217aa0cf41af59f5acc43e915
+    - path: corpus/dev.spacy
+      md5: 7672fef6be54f1af901a0f8eb56be83f
+  outs:
+    - path: training/model-best-trf
+      md5: null
+  spacy_version: 3.1.3
+  spacy_git_version: 8bda39f08

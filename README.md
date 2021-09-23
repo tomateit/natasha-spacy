@@ -237,6 +237,8 @@ PER────              LOC────                     ORG────
 
 Both <a href="https://github.com/natasha/nerus">Nerus</a> and <a href="https://github.com/natasha/navec">Navec</a> are adapted to fit SpaCy utilities. Training procedure uses only standart `spacy convert`, `spacy init-model`, `spacy train`.
 
+Version 2 uses `data` directory for downloaded data
+
 Initialize the environment. We use SpaCy 2.3 for training, Russian language in SpaCy requires PyMorphy for morphology.
 ```bash
 pip install spacy==2.3.5 pymorphy2==0.8
@@ -254,6 +256,7 @@ wget https://storage.yandexcloud.net/natasha-spacy/data/nerus-dev.conllu.gz -P d
 wget https://storage.yandexcloud.net/natasha-spacy/data/nerus-train.conllu.gz -P data
 gunzip data/nerus-*.conllu.gz
 ```
+
 
 WARNING! Conversion requires 32GB of RAM, resulting in JSON that is 4.5GB in size. 
 ```bash
@@ -288,6 +291,8 @@ Itn  Tag Loss    Tag %    Dep Loss    UAS     LAS    NER Loss   NER P   NER R   
 ### v3
 
 We use <a href="https://nightly.spacy.io/usage/projects">SpaCy projects</a>, training procedure is described in <a href="https://github.com/natasha/natasha-spacy/blob/master/project/project.yml">project/project.yml</a>.
+Version 3 uses `assets` for downloaded data
+
 
 Download, uncompress embeddings table and training data.
 ```bash
@@ -300,11 +305,12 @@ Convert training data for SpaCy binary format. WARNING! 32 GB of RAM is required
 spacy project run corpus
 ```
 
-Convert and prune embeddings table.
+Convert and prune embeddings table (for navec vectors).
 ```bash
 spacy project run vectors
 ```
 
+### Training model with static vectors
 ~3 hours per epoch on CPU, requires ~24 GB of RAM.
 ```bash
 spacy project run train
@@ -328,14 +334,31 @@ E    #       LOSS TOK2VEC  LOSS TAGGER  LOSS PARSER  LOSS NER  TAG_ACC  DEP_UAS 
   6  140000   14587665.69    465145.74    777173.79  90970.47    97.09    96.52    95.15    99.74   93.81   93.18   94.45    0.96
 ```
 
+### Training model with transformer
+~12 hours per epoch on CPU, requires ~ 18 GB of RAM.
+```bash
+spacy project run train_trf
+
+E    #       LOSS TRANS...  LOSS TAGGER  LOSS PARSER  LOSS NER  TAG_ACC  DEP_UAS  DEP_LAS  SENTS_F  ENTS_F  ENTS_P  ENTS_R  SCORE 
+---  ------  -------------  -----------  -----------  --------  -------  -------  -------  -------  ------  ------  ------  ------
+  0       0           0.00       198.77       367.62     92.71    37.00    20.40     5.96     0.42    0.00    0.00    0.00    0.17
+  0    1000      158204.44     68473.41     98832.01  13918.14    82.48    84.02    77.68    95.55   61.12   60.42   61.84    0.75
+  0    2000       81835.57     43923.07     67820.39   8677.62    85.74    85.89    80.91    97.32   72.72   75.65   70.01    0.81
+  0    3000       89780.85     38917.99     60616.87   7197.01    87.47    87.05    82.42    96.12   69.92   73.56   66.62    0.81
+  0    4000      104320.56     36400.04     58788.03   7066.99    88.61    88.66    84.45    98.24   76.11   77.83   74.47    0.84
+  0    5000      217537.67     64910.02    106771.86  11927.24    91.60    91.75    88.47    99.10   83.42   83.04   83.81    0.88
+  0    6000      430322.09    112290.11    198244.08  20862.74    93.21    93.04    90.25    99.32   85.03   85.42   84.63    0.90
+```
+
 ## Package
 
-Update `meta.json` with description, authors, sources. On model name `core_news_md`:
+Update `model-best/meta.json` with description, authors, sources. On model name `core_news_md`:
 - `core` — provides all three components: tagger, parser and ner;
 - `news` — trained on Nerus that is large automatically annotated news corpus;
 - `md` — in SpaCy small models are 10-50MB in size, `md` - 50-200MB, `lg` - 200-600MB, out model is ~140MB.
 
 ### v2
+Unlike v.3, v.2 uses `train` folder for model output instead of `training`.
 
 ```javascript
 {
@@ -384,8 +407,14 @@ Change versions, rest is the same as in v2.
 ```
 
 Use SpaCy projects to build package, config is in <a href="https://github.com/natasha/natasha-spacy/blob/master/project/project.yml">project/project.yml</a>.
+
 ```bash
 spacy project run package
+```
+
+### v3 transformer
+```bash
+spacy project run package_trf
 ```
 
 ## History

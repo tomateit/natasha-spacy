@@ -1,5 +1,8 @@
 title: "SpaCy Russian model"
 
+# assets is for external data
+# corpus is for conversion output into spaCy format
+# training is training outputs
 directories: ["assets", "corpus", "training", "package"]
 
 assets:
@@ -18,7 +21,7 @@ assets:
 
 commands:
   - name: extract
-    help: "Uncompress train, dev"
+    help: "Uncompress train, dev nerus corpora"
     script:
       - "gunzip --keep assets/train.conllu.gz assets/dev.conllu.gz"
     deps:
@@ -28,25 +31,25 @@ commands:
       - "assets/train.conllu"
       - "assets/dev.conllu"
 
-  - name: config
-    help: "Generate config"
-    script:
-      - "spacy init config --lang ru --pipeline tagger,parser,ner --optimize efficiency -C config.cfg"
-      - "spacy init fill-config config.cfg config.cfg"
-    outputs:
-      - "config.cfg"
+  # - name: config
+  #   help: "Generate config"
+  #   script:
+  #     - "spacy init config --lang ru --pipeline tagger,parser,ner --optimize efficiency -C config.cfg"
+  #     - "spacy init fill-config config.cfg config.cfg"
+  #   outputs:
+  #     - "config.cfg"
 
   - name: vectors
     help: "Convert and prune vectors"
     script:
-      - "spacy init vectors ru assets/vectors.txt.gz training/vectors --prune 125000 --name ru_navec_vectors_md"
+      - "spacy init vectors ru assets/vectors.txt.gz corpus/vectors --prune 125000 --name ru_navec_vectors_md"
     deps:
       - "assets/vectors.txt.gz"
     outputs:
       - "corpus/vectors"
 
   - name: corpus
-    help: "Convert the data to spaCy's format"
+    help: "Convert the conllu corpus data to spaCy's format"
     script:
       - "spacy convert assets/train.conllu corpus --converter conllu --n-sents 10 --morphology"
       - "spacy convert assets/dev.conllu corpus --converter conllu --n-sents 10 --morphology"
@@ -58,12 +61,23 @@ commands:
       - "corpus/dev.spacy"
 
   - name: train
-    help: "Train the full pipeline"
+    help: "Train the full pipeline with navec"
     script:
       - python -m spacy train config.cfg --output training
     deps:
       - "config.cfg"
       - "corpus/vectors"
+      - "corpus/train.spacy"
+      - "corpus/dev.spacy"
+    outputs:
+      - "training/model-best"
+
+  - name: train_trf
+    help: "Train the full pipeline with transformer"
+    script:
+      - python -m spacy train config_trf.cfg --output training
+    deps:
+      - "config_trf.cfg"
       - "corpus/train.spacy"
       - "corpus/dev.spacy"
     outputs:
@@ -78,7 +92,16 @@ commands:
     outputs_no_cache:
       - "package/ru_core_news_md-3.0.0/dist/ru_core_news_md-3.0.0.tar.gz"
 
+  - name: package_trf
+    help: "Package the trained model so it can be installed"
+    script:
+      - "python -m spacy package training/model-best package --name core_news_trf --version 3.0.0 --force"
+    deps:
+      - "training/model-best"
+    outputs_no_cache:
+      - "package/ru_core_news_trf-3.0.0/dist/ru_core_news_trf-3.0.0.tar.gz"
+
   - name: clean
     help: "Remove intermediate files"
     script:
-      - "rm -rf training/* corpus/* package/*"
+      - "rm -rf training/* corpus/* package/* assets/*"
