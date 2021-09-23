@@ -273,7 +273,8 @@ spacy init-model ru train/base --vectors-loc data/navec.12B.300d.txt.gz --prune-
 Training takes ~2 hours per epoch on CPU (~5 times faster on GPU).
 ```bash
 spacy train --base-model train/base --n-iter 10 ru train/model train/data/nerus-train.json train/data/nerus-dev.json
-
+```
+```
 Itn  Tag Loss    Tag %    Dep Loss    UAS     LAS    NER Loss   NER P   NER R   NER F   Token %  CPU WPS
 ---  ---------  --------  ---------  ------  ------  ---------  ------  ------  ------  -------  -------
   1  1612372.812    96.587  3097137.617  96.141  94.451  293158.500  93.775  94.075  93.925  100.000     4881
@@ -314,7 +315,8 @@ spacy project run vectors
 ~3 hours per epoch on CPU, requires ~24 GB of RAM.
 ```bash
 spacy project run train
-
+```
+```
 E    #       LOSS TOK2VEC  LOSS TAGGER  LOSS PARSER  LOSS NER  TAG_ACC  DEP_UAS  DEP_LAS  SENTS_F  ENTS_F  ENTS_P  ENTS_R  SCORE
 ---  ------  ------------  -----------  -----------  --------  -------  -------  -------  -------  ------  ------  ------  ------
   0       0          0.00       198.77       325.44     95.21    14.05    20.94     6.86     0.00    0.54    4.42    0.29    0.10
@@ -338,7 +340,8 @@ E    #       LOSS TOK2VEC  LOSS TAGGER  LOSS PARSER  LOSS NER  TAG_ACC  DEP_UAS 
 ~12 hours per epoch on CPU, requires ~ 18 GB of RAM.
 ```bash
 spacy project run train_trf
-
+```
+```
 E    #       LOSS TRANS...  LOSS TAGGER  LOSS PARSER  LOSS NER  TAG_ACC  DEP_UAS  DEP_LAS  SENTS_F  ENTS_F  ENTS_P  ENTS_R  SCORE 
 ---  ------  -------------  -----------  -----------  --------  -------  -------  -------  -------  ------  ------  ------  ------
   0       0           0.00       198.77       367.62     92.71    37.00    20.40     5.96     0.42    0.00    0.00    0.00    0.17
