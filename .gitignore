@@ -2,3 +2,10 @@ notes.org
 .ipynb_checkpoints/
 data/
 models/
+.venv
+.vscode
+training/ 
+corpus/ 
+package/
+assets/
+train/
